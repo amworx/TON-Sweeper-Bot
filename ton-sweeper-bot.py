@@ -1,200 +1,87 @@
 import requests
+import json
 import time
 import random
-import json
-import os
 
-# Load configuration from JSON file
-def load_config():
-    config_file = 'config.json'
-    if os.path.exists(config_file):
-        with open(config_file, 'r') as f:
-            config = json.load(f)
-            return (config['compromised_wallet_address'],
-                    config['new_wallet_address'],
-                    config['private_key'],
-                    config['toncenter_api_key'],
-                    config['sleep_interval_min'],
-                    config['sleep_interval_max'])
+# Load wallet data from config.json
+with open('config.json') as config_file:
+    config = json.load(config_file)
+
+# Load coins list from coinslist.json
+with open('coinslist.json') as coinslist_file:
+    coins_list = json.load(coinslist_file)
+
+# Function to get the balance of a wallet for a given token
+def get_token_balance(wallet_address, token_address, api_key, api_url):
+    url = f"{api_url}/getAddressBalance?address={wallet_address}&token={token_address}&api_key={api_key}"
+    response = requests.get(url)
+    
+    if response.status_code == 200:
+        data = response.json()
+        if 'balance' in data:
+            return float(data['balance']) / (10**data.get('decimals', 9))  # Adjust for token decimals
     else:
-        print("Configuration file not found!")
-        return None
+        print(f"Error fetching balance for {wallet_address}: {response.status_code} - {response.text}")
+    return 0
 
-# Function to get live conversion rates from CoinGecko
-def get_live_conversion_rates():
-    # Define the tokens and their corresponding CoinGecko IDs
-    tokens = {
-        'TON': 'toncoin',
-        'USD₮': 'tether',
-        #'CATI': 'catizen',  # Updated CoinGecko ID for CATI
-        #'HMSTR': 'hamster-kombat'  # Updated CoinGecko ID for HMSTR
-    }
+# Function to check TON balance
+def get_ton_balance(wallet_address, api_key, api_url):
+    url = f"{api_url}/getAddressBalance?address={wallet_address}&api_key={api_key}"
+    response = requests.get(url)
     
-    # Fetch the current prices for the tokens
-    url = 'https://api.coingecko.com/api/v3/simple/price'
-    ids = ','.join(tokens.values())
-    params = {
-        'ids': ids,
-        'vs_currencies': 'usd'  # Get prices in USD
-    }
-    
-    try:
-        response = requests.get(url, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            conversion_rates = {token: data.get(token_id, {}).get('usd', 0) for token, token_id in tokens.items()}
-            return conversion_rates
-        else:
-            print(f"Error fetching conversion rates: {response.status_code} - {response.text}")
-            return {token: 0 for token in tokens}  # Return zero for all if there's an error
-    except Exception as e:
-        print(f"Exception while fetching conversion rates: {e}")
-        return {token: 0 for token in tokens}  # Return zero for all if an exception occurs
+    if response.status_code == 200:
+        data = response.json()
+        if 'balance' in data:
+            return float(data['balance']) / (10**9)  # TON has 9 decimals
+    else:
+        print(f"Error fetching TON balance for {wallet_address}: {response.status_code} - {response.text}")
+    return 0
 
+# Function to simulate sweeping process (replace with actual transaction logic)
+def sweep_funds(wallet_address, new_wallet_address, token_name, balance):
+    print(f"Sweeping {balance} {token_name} from {wallet_address} to {new_wallet_address}")
+    # Add actual sweeping logic here
+    return True
 
-# Function to convert token balances to USDT equivalent using live rates
-def calculate_usdt_equivalent(balances):
-    conversion_rates = get_live_conversion_rates()
-    
-    # Debug: Print the fetched conversion rates
-    print(f"Conversion Rates: {conversion_rates}")
-    
-    total_usdt = 0
-    for token, balance in balances.items():
-        rate = conversion_rates.get(token, 0)
-        
-        # Debug: Print each token's balance and conversion rate
-        print(f"Token: {token}, Balance: {balance}, Conversion Rate: {rate}")
-        
-        total_usdt += balance * rate
-    
-    return total_usdt
-
-
-# Main function to execute the bot
-def main():
-    config = load_config()
-    if config is None:
-        return
-    
-    (compromised_wallet_address, new_wallet_address, 
-     private_key, toncenter_api_key, 
-     sleep_interval_min, sleep_interval_max) = config
-
-    # Token tickers and their corresponding addresses
-    tokens = {
-        'TON': compromised_wallet_address,
-        'USD₮': 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-        #'CATI': 'EQD-cvR0Nz6XAyRBvbhz-abTrRC6sI5tvHvvpeQraV9UAAD7',
-        #'HMSTR': 'EQAJ8uWd7EBqsmpSWaRdf_I-8R8-XHwh3gsNKhy-UrdrPcUo'
-    }
-
-    # Function to get the balance of a specific token
-    def get_balance(wallet_address, token):
-        url = f'https://toncenter.com/api/v2/getAddressBalance?address={wallet_address}&token={token}&api_key={toncenter_api_key}'
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            data = response.json()
-            if data['ok']:
-                return int(data['result'])
-            else:
-                print(f"Warning: 'result' key not found in response for {token} ({wallet_address}). Full response: {data}")
-                return 0
-        else:
-            print(f"Error fetching {token} balance for {wallet_address}: {response.status_code} - {response.text}")
-            return 0
-
-    # Function to get the TON balance specifically
-    def get_ton_balance(wallet_address):
-        url = f'https://toncenter.com/api/v2/getAddressBalance?address={wallet_address}&token=TON&api_key={toncenter_api_key}'
-        response = requests.get(url)
-
-        if response.status_code == 200:
-            data = response.json()
-            if data['ok']:
-                if 'result' in data:
-                    return int(data['result'])
-                else:
-                    print(f"Warning: 'result' key not found in response for TON ({wallet_address}). Full response: {data}")
-                    return 0
-            else:
-                print(f"Error: API response not OK for TON ({wallet_address}). Full response: {data}")
-                return 0
-        else:
-            print(f"Error fetching TON balance for {wallet_address}: {response.status_code} - {response.text}")
-            return 0
-
-    # Function to sweep funds
-    def sweep_funds(token_address, token, amount):
-        url = f'https://toncenter.com/api/v2/sweepFunds'
-        payload = {
-            'from': token_address,
-            'to': new_wallet_address,
-            'value': amount,
-            'private_key': private_key,
-            'token': token,
-            'api_key': toncenter_api_key
-        }
-        response = requests.post(url, json=payload)
-
-        if response.status_code == 200:
-            data = response.json()
-            if data['ok']:
-                print(f"Successfully swept {amount} {token} from {token_address} to {new_wallet_address}.")
-                return amount
-            else:
-                print(f"Error sweeping funds: {data['error']}")
-        else:
-            print(f"Error sweeping funds: {response.status_code} - {response.text}")
-        return 0
-
-    # Main process to check balances and sweep funds
+# Main sweeping process
+def start_sweep():
     attempt_count = 0
-
     while True:
-        print("Starting fund sweep process...")
+        attempt_count += 1
+        print(f"\nStarting fund sweep process... Attempt: {attempt_count}")
 
-        # Gather balances
-        balances = {}
-        for token, token_address in tokens.items():
-            balance = get_balance(token_address, token)
-            balances[token] = balance
+        compromised_wallet = config['compromised_wallet_address']
+        new_wallet = config['new_wallet_address']
+        api_key = config['toncenter_api_key']
+        api_url = config['toncenter_api_url']
 
-        # Calculate total funds in USDT
-        total_usdt = calculate_usdt_equivalent(balances)
+        # Check gas fees (TON balance)
+        ton_balance = get_ton_balance(compromised_wallet, api_key, api_url)
+        print(f"Wallet: {compromised_wallet}, TON Balance: {ton_balance}")
+        
+        if ton_balance > 0.05:  # Ensure there's enough TON for transaction fees
+            # Always sweep TON first
+            if ton_balance > 0.05:
+                if sweep_funds(compromised_wallet, new_wallet, 'TON', ton_balance - 0.05):
+                    print(f"Successfully swept {ton_balance - 0.05} TON")
 
-        # Get TON balance for compromised wallet
-        ton_balance = get_ton_balance(compromised_wallet_address)
-
-        # Display the wallet information
-        print(f"Wallet: {compromised_wallet_address}")
-        print(f"Total fund in USDT: {total_usdt}")
-        for token, balance in balances.items():
-            print(f"{token}: {balance}")
-
-        print(f"\nNew wallet: {new_wallet_address}")
-        new_wallet_total_usdt = get_balance(new_wallet_address, 'USD₮')  # Assuming only USD₮ for new wallet balance
-        print(f"Total fund in USDT: {new_wallet_total_usdt}")
-
-        # Check for gas fees
-        if ton_balance > 0:
-            for token, token_address in tokens.items():
-                balance = get_balance(token_address, token)
-
-                if balance > 0:
-                    attempt_count += 1
-                    print(f"Attempting to sweep {balance} {token} from {token_address}...")
-                    swept_amount = sweep_funds(token_address, token, balance)
-                    if swept_amount > 0:
-                        print(f"Swept amount: {swept_amount} {token}.")
+            # Sweep other coins dynamically from coinslist.json
+            for token_name, token_info in coins_list.items():
+                token_address = token_info['address']
+                token_balance = get_token_balance(compromised_wallet, token_address, api_key, api_url)
+                print(f"Wallet: {compromised_wallet}, {token_name} Balance: {token_balance}")
+                
+                if token_balance > 0:
+                    if sweep_funds(compromised_wallet, new_wallet, token_name, token_balance):
+                        print(f"Successfully swept {token_balance} {token_name}")
+                else:
+                    print(f"Wallet {compromised_wallet} does not have enough {token_name} for sweeping.")
         else:
-            print("No gas fees in the compromised wallet to cover sweeping ...")
+            print(f"Not enough TON in the wallet for gas fees.")
 
-        # Random sleep interval
-        sleep_time = random.randint(sleep_interval_min, sleep_interval_max)
-        print(f"\nSleeping for {sleep_time} seconds...\n")
+        sleep_time = random.randint(config['sleep_interval_min'], config['sleep_interval_max'])
+        print(f"Sleeping for {sleep_time} seconds...\n")
         time.sleep(sleep_time)
 
-if __name__ == "__main__":
-    main()
+# Start the sweeping process
+start_sweep()

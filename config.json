@@ -3,7 +3,7 @@
     "new_wallet_address": "YOUR_NEW_WALLET_ADDRESS",
     "private_key": "COMPROMISED_WALLET_PRIVATE_KEY_OR_SEED_PHRASE",
     "toncenter_api_key": "TONCENTER_API_KEY",
-    "toncenter_api_url": "https://toncenter.com/api/v2",  // Your Toncenter API URL here
+    "toncenter_api_url": "https://toncenter.com/api/v2",
     "sleep_interval_min": 5,
     "sleep_interval_max": 10
 }
