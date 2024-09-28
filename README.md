@@ -1,3 +1,4 @@
+
 # Fund Sweeping Bot for TON Blockchain
 
 ## Overview
@@ -13,7 +14,7 @@ Before running the bot, ensure you have the following:
     -   You can download it from [Python's official website](https://www.python.org/downloads/).
 2.  **Python Libraries**: The bot requires specific libraries to run. You can install these using `pip`:
     ```python
-    `pip install requests` 
+    pip install requests
     ```
 3.  **TON Center API Key**: You need a valid API key from TON Center to interact with the TON blockchain.
     
@@ -25,7 +26,7 @@ Before running the bot, ensure you have the following:
 
 ### Example config.json
 ```json
-`{
+{
     "compromised_wallet_address": "YOUR_COMPROMISED_WALLET_ADDRESS",
     "new_wallet_address": "YOUR_NEW_WALLET_ADDRESS",
     "private_key": "COMPROMISED_WALLET_PRIVATE_KEY_OR_SEED_PHRASE",
@@ -33,25 +34,25 @@ Before running the bot, ensure you have the following:
     "toncenter_api_url": "https://toncenter.com/api/v2",
     "sleep_interval_min": 5,
     "sleep_interval_max": 10
-}` 
+}
 ```
 ### Example coinslist.json
 ```json
-`{
+{
   "CATI": {
     "address": "EQD-cvR0Nz6XAyRBvbhz-abTrRC6sI5tvHvvpeQraV9UAAD7"
   },
   "TOKEN2": {
     "address": "YOUR_OTHER_TOKEN_ADDRESS"
   }
-}` 
+}
 ```
 ## Setup Instructions
 
 1.  **Clone the Repository**: Download the bot code to your local machine. You can clone it using Git or download it as a ZIP file.
     ```bash    
     git clone <repository_url>
-    cd <repository_directory>` 
+    cd <repository_directory>
     ```
 2.  **Create Configuration Files**:
     
@@ -61,7 +62,7 @@ Before running the bot, ensure you have the following:
     
 4.  **Run the Bot**: Once everything is set up, you can run the bot using:
     ```python    
-    `python ton-sweeper-bot.py` 
+    python ton-sweeper-bot.py
     ```
 5.  **Monitor Output**: The bot will display logs in the console, showing its attempts to sweep funds and any errors encountered during execution.
     
