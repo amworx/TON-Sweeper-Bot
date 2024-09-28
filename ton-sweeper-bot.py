@@ -26,8 +26,8 @@ def get_live_conversion_rates():
     tokens = {
         'TON': 'toncoin',
         'USD₮': 'tether',
-        'CATI': 'catizen',  # Updated CoinGecko ID for CATI
-        'HMSTR': 'hamster-kombat'  # Updated CoinGecko ID for HMSTR
+        #'CATI': 'catizen',  # Updated CoinGecko ID for CATI
+        #'HMSTR': 'hamster-kombat'  # Updated CoinGecko ID for HMSTR
     }
     
     # Fetch the current prices for the tokens
@@ -85,8 +85,8 @@ def main():
     tokens = {
         'TON': compromised_wallet_address,
         'USD₮': 'EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs',
-        'CATI': 'EQD-cvR0Nz6XAyRBvbhz-abTrRC6sI5tvHvvpeQraV9UAAD7',
-        'HMSTR': 'EQAJ8uWd7EBqsmpSWaRdf_I-8R8-XHwh3gsNKhy-UrdrPcUo'
+        #'CATI': 'EQD-cvR0Nz6XAyRBvbhz-abTrRC6sI5tvHvvpeQraV9UAAD7',
+        #'HMSTR': 'EQAJ8uWd7EBqsmpSWaRdf_I-8R8-XHwh3gsNKhy-UrdrPcUo'
     }
 
     # Function to get the balance of a specific token
