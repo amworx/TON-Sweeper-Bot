@@ -1,0 +1,10 @@
+[
+  {
+      "api_key": "YOUR_API_KEY_1",
+      "api_url": "https://toncenter.com/api/v2"
+  },
+  {
+      "api_key": "YOUR_API_KEY_2",
+      "api_url": "https://toncenter.com/api/v2"
+  }  
+]
