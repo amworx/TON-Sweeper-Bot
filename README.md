@@ -51,8 +51,8 @@ Before running the bot, ensure you have the following:
 
 1.  **Clone the Repository**: Download the bot code to your local machine. You can clone it using Git or download it as a ZIP file.
     ```bash    
-    git clone <repository_url>
-    cd <repository_directory>
+    git clone https://github.com/amworx/TON-Sweeper-Bot.git
+    cd TON-Sweeper-Bot
     ```
 2.  **Create Configuration Files**:
     
